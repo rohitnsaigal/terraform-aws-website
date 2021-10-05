@@ -9,21 +9,23 @@ This module will:
 This module assumes you registered your domain through AWS and therefore already have a hosted zone created for that domain. If you do not have a domain yet, [register one through AWS](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/domain-register.html)
 
 How to use this module
-```terraform
 
-module "my_new_website" {
-    source="gitlab.com"
-    site_domain="mywebsitename.myregistereddomain"
-    route53_zone_id="route53zoneidforyourdomain"
-}
+1.  Create main.tf
 
-output "s3_bucket_for_my_new_website"{
-    value=module.my_new_website.s3_bucket
-}
-    
+    ```terraform
 
-```
+    module "my_new_website" {
+        source="gitlab.com"
+        site_domain="mywebsitename.myregistereddomain"
+        route53_zone_id="route53zoneidforyourdomain"
+    }
 
-Once the infrastructure has been established, then you simply need to upload your website contents to the s3 bucket.
+    output "s3_bucket_for_my_new_website"{
+        value=module.my_new_website.s3_bucket
+    }
+        
 
-Until you upload an index.html document, if you visit your newly created website you will get a 404
+    ```
+2. Run `terraform apply`
+
+3. Upload index.html along with other website files to S3 bucket. Until you upload an index.html document, if you visit your newly created website you will get a 404
