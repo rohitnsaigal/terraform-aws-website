@@ -14,14 +14,14 @@ How to use this module
 
     ```terraform
 
-    module "my_new_website" {
-        source="gitlab.com"
-        site_domain="mywebsitename.myregistereddomain"
-        route53_zone_id="route53zoneidforyourdomain"
+    module "the_new_website" {
+        source="github.com/rohitnsaigal/terraform-aws-website"
+        site_domain="<your-website-name>.<your-registered-domain>"
+        route53_zone_id="<route53-zoneid-for-your-domain>"
     }
 
     output "s3_bucket_for_my_new_website"{
-        value=module.my_new_website.s3_bucket
+        value=module.the_new_website.s3_bucket
     }
         
 
