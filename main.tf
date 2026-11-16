@@ -112,7 +112,7 @@ resource "aws_cloudfront_distribution" "site" {
 }
 
 
-# DNS validation to create a hosted zone
+# ACM certificate creation
 resource "aws_acm_certificate" "cert" {
   domain_name               = var.site_domain
   subject_alternative_names = ["www.${var.site_domain}"]
@@ -120,12 +120,14 @@ resource "aws_acm_certificate" "cert" {
 }
 
 # THE FOLLOWING IS ONLY NEEDED IF CREAING A NEW HOSTED ZONE
-# data "aws_route53_zone" "zone" {
-#   name = "${var.route53_domain}"
-#   private_zone=false
-# }
+data "aws_route53_zone" "zone" {
+  count = var.route53_domain ? 1 : 0
+  name = "${var.route53_domain}"
+  private_zone=false
+}
 
 
+# Route53 cert validation record
 resource "aws_route53_record" "cert_validation" {
   for_each = {
     for dvo in aws_acm_certificate.cert.domain_validation_options : dvo.domain_name => {
@@ -143,6 +145,7 @@ resource "aws_route53_record" "cert_validation" {
   zone_id         = var.route53_zone_id
 }
 
+# link cert to cert validation record
 resource "aws_acm_certificate_validation" "cert" {
   certificate_arn         = aws_acm_certificate.cert.arn
   validation_record_fqdns = [for record in aws_route53_record.cert_validation : record.fqdn]
@@ -150,7 +153,7 @@ resource "aws_acm_certificate_validation" "cert" {
 
 # route 53 redirect record 
 resource "aws_route53_record" "www" {
-  zone_id = var.route53_zone_id
+  zone_id = var.route53_domain ? aws_route53_zone.zone.id : var.route53_zone_id
   name    = var.site_domain
   type    = "A"
 
@@ -163,7 +166,7 @@ resource "aws_route53_record" "www" {
 
 # route 53 redirect record for www. prefix endpoint version of website
 resource "aws_route53_record" "redirect-wwww" {
-  zone_id = var.route53_zone_id
+  zone_id = var.route53_domain ? aws_route53_zone.zone.id : var.route53_zone_id
   name    = "www.${var.site_domain}"
   type    = "A"
 
